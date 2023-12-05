@@ -1,5 +1,5 @@
-function login(username:string) {
-    console.log("first login")
+function login(username: string) {
+  console.log("first login");
 }
-    
-login("guest")
+
+login("guest");
