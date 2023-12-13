@@ -1,7 +1,26 @@
 import request from "supertest";
 import app from "../../src/app";
+import { User } from "../../src/entity/User";
+import { DataSource } from "typeorm";
+import { AppDataSource } from "../../src/config/data-source";
+import { truncatetables } from "../utils";
 
 describe("POST /auth/register", () => {
+   let connection: DataSource;
+
+   beforeAll(async () => {
+      connection = await AppDataSource.initialize();
+   });
+
+   beforeEach(async () => {
+      //database truncate
+      await truncatetables(connection);
+   });
+
+   afterAll(async () => {
+      await connection.destroy();
+   });
+
    describe("given all fields", () => {
       test("it should return the 201 status code", async () => {
          //Arrange
@@ -50,7 +69,12 @@ describe("POST /auth/register", () => {
          //Act
          await request(app).post("/auth/register").send(userdata);
 
-         // accert
+         // Accert
+         const userRepository = connection.getRepository(User);
+         const users = await userRepository.find();
+         expect(users).toHaveLength(1);
+         expect(users[0].firstname).toEqual("John");
+         expect(users[0].email).toBe(userdata.email);
       });
    });
 
