@@ -143,5 +143,25 @@ describe("POST /auth/register", () => {
       });
    });
 
-   describe("field are missing", () => {});
+   describe("field are missing", () => {
+      test("it should return if email field is missing", async () => {
+         // Arrange
+         const userdata = {
+            firstname: "John",
+            lastname: "jaob",
+            email: "",
+            password: "password",
+         };
+
+         //Act
+         const response = await request(app)
+            .post("/auth/register")
+            .send(userdata);
+         expect(response.statusCode).toBe(400);
+
+         const userRepository = connection.getRepository(User);
+         const users = await userRepository.find();
+         expect(users).toHaveLength(0);
+      });
+   });
 });
