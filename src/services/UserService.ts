@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import { User } from "./../entity/User";
 import { UserData } from "../types";
 import { Repository } from "typeorm";
@@ -7,12 +8,15 @@ import { Roles } from "../constants";
 export class UserService {
    constructor(private userRepository: Repository<User>) {}
    async create({ firstname, lastname, email, password }: UserData) {
+      // hashed password
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
       try {
          return await this.userRepository.save({
             firstname,
             lastname,
             email,
-            password,
+            password: hashedPassword,
             role: Roles.CUSTOMER,
          });
       } catch (error) {
