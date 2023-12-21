@@ -4,6 +4,8 @@ import { User } from "../../src/entity/User";
 import { DataSource } from "typeorm";
 import { AppDataSource } from "../../src/config/data-source";
 import { Roles } from "../../src/constants";
+import { isJwt } from "../utils";
+import { RefreshToken } from "../../src/entity/RefreshToken";
 // import { truncatetables } from "../utils";
 
 describe("POST /auth/register", () => {
@@ -140,6 +142,69 @@ describe("POST /auth/register", () => {
          //assert
          expect(response.statusCode).toBe(400);
          expect(users).toHaveLength(1);
+      });
+
+      test("should return the access token and refresh token insid e cookie", async () => {
+         // Arrange
+         const userdata = {
+            firstname: "John",
+            lastname: "jaob",
+            email: " anil123@gmail.com ",
+            password: "password",
+         };
+
+         interface Headers {
+            ["set-cookie"]: string[];
+         }
+
+         //Act
+         const response = await request(app)
+            .post("/auth/register")
+            .send(userdata);
+
+         let accessToken = null;
+         let refreshToken = null;
+
+         const cookies = (response.headers as Headers)["set-cookie"] || [];
+         cookies.forEach((cookie) => {
+            if (cookie.startsWith("accessToken=")) {
+               accessToken = cookie.split(";")[0].split("=")[1];
+            }
+            if (cookie.startsWith("refreshToken=")) {
+               refreshToken = cookie.split(";")[0].split("=")[1];
+            }
+         });
+         expect(accessToken).not.toBeNull();
+         expect(refreshToken).not.toBeNull();
+         expect(isJwt(accessToken)).toBeTruthy();
+         expect(isJwt(refreshToken)).toBeTruthy();
+      });
+
+      test("should refrsh token store in the database", async () => {
+         // Arrange
+         const userdata = {
+            firstname: "John",
+            lastname: "jaob",
+            email: " anil123@gmail.com ",
+            password: "password",
+         };
+
+         //Act
+         // const response =
+         await request(app).post("/auth/register").send(userdata);
+
+         const refreshTokenRepo = connection.getRepository(RefreshToken);
+         const refreshTokens = await refreshTokenRepo.find();
+         expect(refreshTokens).toHaveLength(1);
+
+         // const tokens = await refreshTokenRepo
+         //    .createQueryBuilder("refreshToken")
+         //    .where("refreshToken.userId = :userId", {
+         //       userId: (response.body as Record<string, string>).id,
+         //    })
+         //    .getMany();
+
+         // expect(tokens).toHaveLength(1);
       });
    });
 
