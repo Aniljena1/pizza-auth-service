@@ -228,9 +228,63 @@ describe("POST /auth/register", () => {
          const users = await userRepository.find();
          expect(users).toHaveLength(0);
       });
-      test.todo("should return 400 status code if firstname are missing");
-      test.todo("should return 400 status code if lastname are missing");
-      test.todo("should return 400 status code if password are missing");
+      test("should return 400 status code if firstname are missing", async () => {
+         const userdata = {
+            firstname: "",
+            lastname: "jaob",
+            email: " anil123@gmail.com ",
+            password: "password",
+         };
+
+         // Act
+         const response = await request(app)
+            .post("/auth/register")
+            .send(userdata);
+
+         // Assert
+         expect(response.statusCode).toBe(400);
+         const userRepository = connection.getRepository(User);
+         const users = await userRepository.find();
+         expect(users).toHaveLength(0);
+      });
+
+      test("should return 400 status code if lastname are missing", async () => {
+         const userData = {
+            firstname: "john",
+            lastname: "",
+            email: " anil123@gmail.com ",
+            password: "password",
+         };
+         // Act
+         const response = await request(app)
+            .post("/auth/register")
+            .send(userData);
+
+         // Assert
+         expect(response.statusCode).toBe(400);
+         const userRepository = connection.getRepository(User);
+         const users = await userRepository.find();
+         expect(users).toHaveLength(0);
+      });
+      test("should return 400 status code if password are missing", async () => {
+         // Arrange
+         const userData = {
+            firstname: "john",
+            lastname: "jaob",
+            email: " anil123@gmail.com ",
+            password: "",
+         };
+         // Act
+         const response = await request(app)
+            .post("/auth/register")
+            .send(userData);
+
+         // Assert
+         expect(response.statusCode).toBe(400);
+         const userRepository = connection.getRepository(User);
+         const users = await userRepository.find();
+         expect(users).toHaveLength(0);
+      });
    });
 
    describe("fields are not proper format", () => {
