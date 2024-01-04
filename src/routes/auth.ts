@@ -11,6 +11,7 @@ import loginValidator from "../validators/login.validator";
 import { CredentialService } from "../services/CredentialService";
 import authenticate from "../middlewares/authenticate";
 import { AuthRequest } from "../types";
+import validateRefreshToken from "../middlewares/validateRefreshToken";
 
 const router = express.Router();
 // Dipendency injection
@@ -51,4 +52,12 @@ router.get(
       authController.self(req as AuthRequest, res),
 );
 
+router.post(
+   "/refresh",
+   // eslint-disable-next-line @typescript-eslint/no-misused-promises
+   validateRefreshToken,
+   // eslint-disable-next-line @typescript-eslint/no-misused-promises
+   (req: Request, res: Response, next: NextFunction) =>
+      authController.refresh(req as AuthRequest, res, next),
+);
 export default router;
