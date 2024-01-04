@@ -12,6 +12,7 @@ import { CredentialService } from "../services/CredentialService";
 import authenticate from "../middlewares/authenticate";
 import { AuthRequest } from "../types";
 import validateRefreshToken from "../middlewares/validateRefreshToken";
+import parseRefreshToken from "../middlewares/parseRefreshToken";
 
 const router = express.Router();
 // Dipendency injection
@@ -59,5 +60,16 @@ router.post(
    // eslint-disable-next-line @typescript-eslint/no-misused-promises
    (req: Request, res: Response, next: NextFunction) =>
       authController.refresh(req as AuthRequest, res, next),
+);
+
+router.post(
+   "/logout",
+   // eslint-disable-next-line @typescript-eslint/no-misused-promises
+   authenticate,
+   // eslint-disable-next-line @typescript-eslint/no-misused-promises
+   parseRefreshToken,
+   // eslint-disable-next-line @typescript-eslint/no-misused-promises
+   (req: Request, res: Response, next: NextFunction) =>
+      authController.logout(req as AuthRequest, res, next),
 );
 export default router;
