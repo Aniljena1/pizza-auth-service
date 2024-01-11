@@ -24,6 +24,7 @@ export class TokenService {
          expiresIn: "1h",
          issuer: "auth-service", // service name
       });
+      console.log("accessToken", accessToken);
       return accessToken;
    }
 

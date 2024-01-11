@@ -37,20 +37,25 @@ export class AuthController {
             password,
          });
 
+         console.log(user);
+
          const payload: JwtPayload = {
             sub: String(user.id),
             role: user.role,
          };
 
          const accessToken = this.tokenService.generateAccessToken(payload);
+         console.log("access token", accessToken);
          // Persist the refresh token
          const newRefreshToken =
             await this.tokenService.persistRefreshToken(user);
+         console.log("newRefreshToken", newRefreshToken);
 
          const refreshToken = this.tokenService.generateRefreshToken({
             ...payload,
             id: String(newRefreshToken.id),
          });
+         console.log("refreshToken", refreshToken);
 
          res.cookie("accessToken", accessToken, {
             domain: "localhost",
