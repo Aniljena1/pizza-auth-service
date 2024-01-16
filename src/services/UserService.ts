@@ -1,14 +1,20 @@
 import { Repository } from "typeorm";
 import bcrypt from "bcrypt";
 import { User } from "./../entity/User";
-import { UserData } from "../types";
+import { LimitedUserData, UserData } from "../types";
 import createHttpError from "http-errors";
-import { Roles } from "../constants";
 
 export class UserService {
    constructor(private userRepository: Repository<User>) {}
 
-   async create({ firstname, lastname, email, password }: UserData) {
+   async create({
+      firstname,
+      lastname,
+      email,
+      password,
+      role,
+      tenantId,
+   }: UserData) {
       const user = await this.userRepository.findOne({
          where: { email: email },
       });
@@ -26,7 +32,8 @@ export class UserService {
             lastname,
             email,
             password: hashedPassword,
-            role: Roles.CUSTOMER,
+            role,
+            tenant: tenantId ? { id: tenantId } : undefined,
          });
       } catch (error) {
          const err = createHttpError(
@@ -40,6 +47,7 @@ export class UserService {
    async findByEmail(email: string) {
       const user = await this.userRepository.findOne({
          where: { email },
+         select: ["id", "firstname", "lastname", "email", "role", "password"],
       });
       return user;
    }
@@ -48,5 +56,32 @@ export class UserService {
       return await this.userRepository.findOne({
          where: { id },
       });
+   }
+
+   async update(
+      userId: number,
+      { firstname, lastname, role }: LimitedUserData,
+   ) {
+      try {
+         return await this.userRepository.update(userId, {
+            firstname,
+            lastname,
+            role,
+         });
+      } catch (err) {
+         const error = createHttpError(
+            500,
+            "Failed to update the user in the database",
+         );
+         throw error;
+      }
+   }
+
+   async getAll() {
+      return await this.userRepository.find();
+   }
+
+   async deleteById(userId: number) {
+      return await this.userRepository.delete(userId);
    }
 }

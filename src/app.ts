@@ -5,12 +5,27 @@ import cookieParser from "cookie-parser";
 import logger from "./config/logger";
 import { HttpError } from "http-errors";
 import authrouter from "./routes/auth";
+import tenantRouter from "./routes/tenant";
+import userRouter from "./routes/user";
+import cors from "cors";
 
 const app = express();
+
+app.use(
+   cors({
+      // todo: move to .env file.
+      origin: ["http://localhost:5174"],
+      credentials: true,
+   }),
+);
+
 app.use(express.static("public"));
 app.use(cookieParser());
 app.use(express.json());
+
 app.use("/auth", authrouter);
+app.use("/tenants", tenantRouter);
+app.use("/users", userRouter);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
